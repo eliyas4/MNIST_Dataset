@@ -1,0 +1,24 @@
+# Notes Pages
+
+## 0.1
+
+The reason we add the inputs into the activations array is that it will be used in 
+backpropagation to find the partial derviative of the loss function w.r.t the weights going from the input to the first hidden 
+layer. If you think about it as you go along the chain rule you will get to a point where you need to calculate the partial
+derivative of the first hidden layer w.r.t the weights that connect the input neurons with the first hidden layer. 
+Remember that this is effectivley asking you to find how a small change in the weights affects the value of the first input 
+layer pre-activation. So when you look at the formula for the first hidden layer E.G. what goes into making a neuron in the 
+first hidden layer you get the following equation...
+
+first hidden layer pre-activation = weight x input.....(for however many weights and inputs there are. In this case 784 times) + bias
+
+Therefore the first hidden layer pre-activation depends on the W(ij) only through the product W(ij)X(j). So it's derivative 
+w.r.t W(ij) is exactly that multiplier X(j) (as a small change in W(ij) changes the first hidden layer pre-activation by 
+a factor of X(j)). Ultimatley this means that you can't just drop the X(j) (input) because it's part of the function you 
+are differentitating. 
+
+## 0.2
+This is the sum of squared errors. we are taking the difference between the actual value of each output neuron and the expected value 
+of each output neuron (In this case either 0 or 1 because it's a classification network). We then sum the squares of all of those
+differences and finially muliply by 1/2 to make backpropagation easier. 
+

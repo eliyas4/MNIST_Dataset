@@ -29,8 +29,11 @@ class MNISTLoader:
 
         # Build char_to_idx / idx_to_char from all unique characters
         unique_chars = sorted(labels_df['character'].unique())
+        print("unique_chars", unique_chars)
         char_to_idx = {c: i for i, c in enumerate(unique_chars)}
+        print("char_to_idx", char_to_idx)
         idx_to_char = {i: c for c, i in char_to_idx.items()}
+        print("idx_to_char", idx_to_char)
 
 
         data: list[tuple[np.ndarray, int]] = []
@@ -67,8 +70,12 @@ class MNISTLoader:
             img = img.resize((28, 28))
             arr = np.array(img, dtype=np.float32) / 255.0
 
-
-            data.append((arr, label_idx))
+            # Add the one hot label method so that each datapoints lable is a one hot lable. 
+            one_hot_label = np.zeros((len(char_to_idx), 1))
+            one_hot_label[label_idx] = 1.0
+            # print("label_idx:", label_idx, "one_hot_label shape:", one_hot_label.shape)
+            # print("one_hot_label sample:\n", one_hot_label.T)
+            data.append((arr.reshape((28 * 28, 1)), one_hot_label))
 
 
         # Split the full data into 80/10/10 for training, validation, and testing.

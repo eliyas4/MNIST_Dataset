@@ -17,8 +17,76 @@ w.r.t W(ij) is exactly that multiplier X(j) (as a small change in W(ij) changes 
 a factor of X(j)). Ultimatley this means that you can't just drop the X(j) (input) because it's part of the function you 
 are differentitating. 
 
+
 ## 0.2
 This is the sum of squared errors. we are taking the difference between the actual value of each output neuron and the expected value 
 of each output neuron (In this case either 0 or 1 because it's a classification network). We then sum the squares of all of those
 differences and finially muliply by 1/2 to make backpropagation easier. 
 
+
+## 0.3
+This note refers to the line 'z_delta = delta * sigmoid_prime(zs[-1])' at this point we have calculated delta which is a 15 x 1 
+matrix that tells us the partial derivative of the loss function w.r.t the output neurons post-activation. Then using the chain 
+rule, this line 'z_delta = delta * sigmoid_prime(zs[-1])' computes the partial derivative of the loss function with respect to 
+the output neurons pre-activation. 
+
+This part uses element-wise multiplication. The '*' operator in numpy means element-wise multiplication. Element-wise multiplication
+happens between two vectors of the same shape E.G. (n, 1) and (n, 1) to produce a vector of the same shape (n, 1). We use this 
+instead of The 'np.dot()' operator because... 
+
+okay so this part is a little hard to explain with words, but it's much easier to explain with an example. So ...
+
+let's say you have 3 neurons in the output layer and here are some pretend values for delta and sigmoid_prime (which is the 
+partial derivative of the neruons post-activation w.r.t the same neurons pre-activation).
+delta = np.array([0.1, -0.3, 0.5])             # dL/da
+sigmoid_prime_z = np.array([0.9, 0.7, 0.2])     # da/dz
+
+Now let’s compute z_delta the correct way:
+z_delta = delta * sigmoid_prime_z
+         = [0.1*0.9, -0.3*0.7, 0.5*0.2]
+         = [0.09, -0.21, 0.10]
+Here we are correctly doing the chain rule by taking the partial derivative of the loss w.r.t each of the output neurons
+post-activation and multiplying each of those values by the partial derivative of that same post-activation w.r.t the 
+same neuron pre-activation. 
+
+Now imagine if we did the dot product instead:
+np.dot(delta, sigmoid_prime_z)
+= 0.1*0.9 + (-0.3)*0.7 + 0.5*0.2
+= 0.09 - 0.21 + 0.10 = -0.02
+Now we have a single number that means absolutely nothing. We've destroyed all neuron-specific information. 
+
+
+## 0.35
+The 'sigmoid_prime' function takes in the pre-activation value of a neuron (z) as a parameter, and returns the partial 
+derivative of the post-activation of the neuron (a) w.r.t the pre-activation value of the same neuron (z). Through the 
+chain rule we then multiply this value by the partial derivative of the loss w.r.t the (a) to get the partial derivative
+of the loss w.r.t (z). (this value is the delta 'δ'. Note that the convention is to have delta mean pd of loss w.r.t
+z and the pd of the loss w.r.t a is just written as ∂L/∂a because The entire backprop derivation focuses on the δ term 
+because that’s what you recursively propagate backward. So ∂L/∂z should really be the only delta (δ) But in this code we 
+are calling ∂L/∂a 'delta' and ∂L/∂z 'z_delta' because I think it makes it clearer and also It happened at the start and 
+now we're rolling with it). 
+
+Now we know what the function does, let's clear up how it works. Now my first thought when I saw this function was that
+if this function was meant to calcualte the partial derivative of (a) w.r.t (z) surely to do this the function would have 
+to take in (a). especially because the partial derivative of (a) w.r.t (z) when using sigmoid activation is 'a(1 - a)'. 
+So how does the function work if it never takes in (a). but when you look the function itself it is 
+'return sigmoid(z)*(1-sigmoid(z))'. which is effectivley 'a(1 - a)', just using the sigmoid function to calcualte a
+on the fly. So that is why it works and why we seemingly never call on the 'activations' list that we set up at the 
+start of our backprop function.  
+
+
+## 0.4
+Before we look into this line of code it's important to establish how our weight matrix is shaped, as this plays a pivitol
+role in everything we are going to see here. So the self.weight matrix (the one initialised in the innit fucntion of the 
+neural network class) is a list of all the weight matrices that lie between the all the different layers of the network.
+These matrices each have the (row, col) shape (length of the next layer, length of current layer). and when you are 
+going backwards in backpropagation you want to make the weight matrix have the shape (length of current layer,
+length of previous layer) because you are going backwards. If any of this is confusing then it's in the ML book at 
+0.6. 
+
+
+## 0.5
+In this for loop we are looping through are layers using the variable l. Note that whenever we call l we always use it's negative (-l).
+This means that when l = 1 we will do something like 'z = zs[-l]' and l will refer to the last layer. This is a pretty simple concept 
+and we do this because it's convention. That's also why we start at 2 and not 1 because for some reason it's convention to calculate
+the output layer seperatly before begining the backpropagation loop. 

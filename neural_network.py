@@ -47,7 +47,7 @@ class Network:
         # self.biases = [b - (learning_rate / len(mini_batch)) * nb for b, nb in zip(self.biases, nabla_b)]
 
     def backprop(self, x, y):
-        # Remember here that x is the 784 x 1 pixle matrix and y is the associated 1 x 15 label. 
+        # Remember here that x is the 784 x 1 pixle matrix and y is the associated 15 x 1 label. 
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
 
@@ -67,11 +67,21 @@ class Network:
         # Now that we have done the forward pass and have the loss we need to do backpropagation. 
         # Start by finding the partial derivative of the loss w.r.t the final layer neurons post-activation. 
         delta = activations[-1] - y
+        # Now get the partial derivative of the loss w.r.t the final layer neruons pre-activation by using the chain rule. 
+        z_delta = delta * sigmoid_prime(zs[-1]) # *** Notes 0.3 *** and *** Notes 0.35 ***
+        # Now calculate the partial derivative of the loss w.r.t the bias of the final layer neurons. 
+        nabla_b[-1] = z_delta
+        # Now calculate the partial derivative of the loss w.r.t the weights that feed the final layer neurons. 
+        nabla_w[-1] = np.dot(z_delta, activations[-2].transpose()) # *** Notes 0.4 ***
 
-        # Now that we have the first part of our 
-        for l in range(-1, -self.num_layers, -1):
-            z_delta = sigmoid_prime(delta) 
-            delta = 
+        # Now that we have the first part of our backpropagation (the part for the output layer and the biases and weights that feed it),
+        # we can begin the backpropagation cycle. 
+        for l in range(2, self.num_layers): # *** Notes 0.5 ***
+            z = zs[-l]
+            
+            # First we take the 
+            z_delta = sigmoid_prime(delta) # *** Notes 0.35 ***
+            delta = ``
 
                 
 
